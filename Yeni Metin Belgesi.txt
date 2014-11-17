@@ -1,0 +1,45 @@
+echo ">>> Kurulum Islemi Basladi"
+echo ">>> Cunedioglu Yazilim"
+sudo yum -y update
+ 
+echo ">>> Apache MYSQL ve PHP'nin kurulumuna basladim "
+sudo rpm -Uvh http://mirror.webtatic.com/yum/el6/latest.rpm
+sudo yum install -y nano git-core httpd php55w php55w-common php55w-mysql php55w-mcrypt php55w-gd
+sudo yum install -y yum-plugin-replace
+sudo yum replace -y mysql-libs --replace-with mysql55w-libs
+sudo yum install -y mysql55w mysql55w-server
+ 
+echo ">>> Kurulumu Tamamladim Simdi Php'yi Derliyorum"
+sudo sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php.ini
+sudo sed -i "s/display_errors = .*/display_errors = On/" /etc/php.ini
+ 
+sudo rm -rf /var/www
+sudo ln -fs /home /var/www
+sudo sed -i 's@var/www/html@home@' /etc/httpd/conf/httpd.conf
+sudo sed -i 's@#EnableSendfile@EnableSendfile@' /etc/httpd/conf/httpd.conf
+sudo sed -i 's@#NameVirtualHost@NameVirtualHost@' /etc/httpd/conf/httpd.conf
+ 
+echo "<h1>Ana Sayfa</h1>" > /home/index.php
+ 
+sudo service httpd start
+sudo chkconfig httpd on
+ 
+echo ">>> Mysqli Derliyorum"
+sudo service mysqld start
+sudo chkconfig mysqld on
+echo "MYSQL root Parolasi: root"
+/usr/bin/mysqladmin -u root password 'root'
+ 
+echo ">>> Mysqli bitirdim Composerin kurulumuna basladim"
+sudo curl -sS https://getcomposer.org/installer | php -- --install-dir=/home
+sudo mv /home/composer.phar /usr/local/bin/composer
+ 
+echo ">>> Composer tamamlandi Sirada Laravel Kurulumu Var"
+sudo wget http://laravel.com/laravel.phar
+sudo chmod +x laravel.phar
+sudo mv laravel.phar /usr/local/bin/laravel
+ 
+echo ">> Tüm Ayarlari tamamladim aktif olmasi için HTTPyi yendien baslatmam gerekecek"
+sudo service httpd restart
+ 
+echo ">>> Kurulum Tamamlanmistir. CUNEDIOGLU YAZILIM"
